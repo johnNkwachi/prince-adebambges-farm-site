@@ -1,45 +1,59 @@
-import React from "react";
+import React, { useState } from "react";
+
+const formatCurrency = (value) =>
+  typeof value === "number" ? `₦${value.toLocaleString("en-NG")}` : "";
 
 const products = [
   {
     name: "Chicken Eggs",
+    image:
+      "https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=800",
     highlight: "Fresh table eggs from healthy layers.",
     details: "Available for retailers, hotels, bakeries and households.",
     tags: ["Retail", "Wholesale"],
     retailPrice: "₦5,000 / crate",
     wholesalePrice: "₦4,900 / crate",
+    unitPrice: 5000,
   },
   {
     name: "Whole Live Broilers",
+    image: "/images/broilers.jpg",
     highlight: "Well–fed broilers with excellent meat yield.",
     details: "Ideal for occasions, restaurants and large buyers.",
-    tags: ["Meat", "Occasions"],
+    tags: ["Live broilers", "Bulk orders"],
     retailPrice: "₦15,000 / bird",
     wholesalePrice: "Talk to us for bulk pricing",
+    unitPrice: 15000,
   },
   {
     name: "Whole Live Chickens",
+    image: "/images/Whole Live Chickens.jpg",
     highlight: "Strong, healthy local and improved breeds.",
     details: "For home consumption and ceremonies.",
     tags: ["Live birds"],
     retailPrice: "₦14,000 / bird",
     wholesalePrice: "Discounts available for volume orders",
+    unitPrice: 14000,
   },
   {
     name: "Plantain, Banana & Palm Oil",
+    images: ["/images/plantain.jpg", "/images/oil.jpg"],
     highlight: "Farm–fresh plantain, banana and premium palm oil.",
     details: "Available in bulk on request.",
-    tags: ["Farm produce", "Bulk"],
+    tags: [],
     retailPrice: "Price varies with market rate",
     wholesalePrice: "Call for current bulk prices",
+    unitPrice: null,
   },
   {
     name: "Pigs, Goats & Rabbits",
+    image: "/images/images.jpg",
     highlight: "Healthy livestock raised under good welfare conditions.",
     details: "Breeding stock and meat animals available.",
     tags: ["Livestock"],
     retailPrice: "Price on request",
     wholesalePrice: "Custom quotes for large orders",
+    unitPrice: null,
   },
 ];
 
@@ -90,6 +104,32 @@ const contactInfo = {
 };
 
 function App() {
+  const [cart, setCart] = useState({});
+  const [cartOpen, setCartOpen] = useState(false);
+
+  const totalItemsInCart = Object.values(cart).reduce(
+    (sum, qty) => sum + qty,
+    0
+  );
+
+  const increaseQty = (productName) => {
+    setCart((prev) => ({
+      ...prev,
+      [productName]: (prev[productName] || 0) + 1,
+    }));
+  };
+
+  const decreaseQty = (productName) => {
+    setCart((prev) => {
+      const current = prev[productName] || 0;
+      if (current <= 1) {
+        const { [productName]: _removed, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [productName]: current - 1 };
+    });
+  };
+
   return (
     <div className="page">
       <header className="nav">
@@ -112,7 +152,93 @@ function App() {
           <a href="#contact" className="nav-cta">
             Contact
           </a>
+          <button
+            type="button"
+            className="cart-pill"
+            onClick={() => setCartOpen((open) => !open)}
+          >
+            <span className="cart-icon">🛒</span>
+            <span className="cart-label">
+              Cart{" "}
+              <span className="cart-count">
+                {totalItemsInCart > 99 ? "99+" : totalItemsInCart}
+              </span>
+            </span>
+          </button>
         </nav>
+        {cartOpen && totalItemsInCart > 0 && (
+          <>
+            <button
+              type="button"
+              className="cart-backdrop"
+              onClick={() => setCartOpen(false)}
+              aria-label="Close cart"
+            />
+            <div className="cart-dropdown">
+              <div className="cart-dropdown-header">
+                <h4>Cart</h4>
+                <button
+                  type="button"
+                  className="cart-close-btn"
+                  onClick={() => setCartOpen(false)}
+                  aria-label="Close cart"
+                >
+                  ×
+                </button>
+              </div>
+              <ul>
+                {Object.entries(cart).map(([name, qty]) => (
+                  <li key={name} className="cart-item">
+                    <div className="cart-item-main">
+                      <span className="cart-item-name">{name}</span>
+                      <div className="qty-row">
+                        <button
+                          type="button"
+                          className="qty-btn"
+                          onClick={() => decreaseQty(name)}
+                        >
+                          −
+                        </button>
+                        <span className="qty-value">{qty}</span>
+                        <button
+                          type="button"
+                          className="qty-btn"
+                          onClick={() => increaseQty(name)}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    <div className="cart-item-pricing">
+                      {(() => {
+                        const product = products.find((p) => p.name === name);
+                        const unit = product?.unitPrice ?? null;
+                        if (unit) {
+                          const total = unit * qty;
+                          return (
+                            <>
+                              <span className="cart-item-unit">
+                                {formatCurrency(unit)} ea
+                              </span>
+                              <span className="cart-item-total">
+                                {formatCurrency(total)}
+                              </span>
+                            </>
+                          );
+                        }
+                        return (
+                          <span className="cart-item-unit">
+                            Contact for price
+                          </span>
+                        );
+                      })()}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
+        )}
       </header>
 
       <main>
@@ -170,15 +296,39 @@ function App() {
           <div className="grid">
             {products.map((product) => (
               <article key={product.name} className="card">
+                {(product.images && product.images.length > 0) || product.image ? (
+                  <div className="card-image-wrap">
+                    {product.images && product.images.length > 0
+                      ? product.images.map((src) => (
+                          <img
+                            key={src}
+                            src={src}
+                            alt={product.name}
+                            className="card-image"
+                            loading="lazy"
+                          />
+                        ))
+                      : (
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="card-image"
+                          loading="lazy"
+                        />
+                      )}
+                  </div>
+                ) : null}
                 <header className="card-header">
                   <h3>{product.name}</h3>
-                  <div className="tags">
-                    {product.tags.map((tag) => (
-                      <span key={tag} className="tag">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
+                  {product.tags && product.tags.length > 0 && (
+                    <div className="tags">
+                      {product.tags.map((tag) => (
+                        <span key={tag} className="tag">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </header>
                 <p className="card-highlight">{product.highlight}</p>
                 <p className="card-details">{product.details}</p>
@@ -193,9 +343,13 @@ function App() {
                   </div>
                 </div>
                 <div className="card-actions">
-                  <a href="#contact" className="btn btn-primary btn-small">
-                    Order / Enquire
-                  </a>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-small"
+                    onClick={() => increaseQty(product.name)}
+                  >
+                    Add to cart
+                  </button>
                 </div>
               </article>
             ))}
