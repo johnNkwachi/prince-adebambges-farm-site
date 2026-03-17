@@ -1,0 +1,19 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="tri" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22c55e" />
+      <stop offset="50%" stop-color="#16a34a" />
+      <stop offset="100%" stop-color="#4ade80" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="12" fill="#ecfdf3" />
+  <polygon points="32 6 6 58 58 58" fill="url(#tri)" />
+  <circle cx="32" cy="30" r="11" fill="#fefce8" />
+  <path
+    d="M32 22c3.866 0 7 2.91 7 6.5S35.866 35 32 35s-7-2.91-7-6.5S28.134 22 32 22z"
+    fill="#f97316"
+  />
+  <circle cx="30" cy="28" r="1.4" fill="#0f172a" />
+  <path d="M34 28.2 38 30l-4 1.8z" fill="#facc15" />
+</svg>
+
