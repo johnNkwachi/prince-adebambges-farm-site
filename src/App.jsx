@@ -1,7 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 const formatCurrency = (value) =>
   typeof value === "number" ? `₦${value.toLocaleString("en-NG")}` : "";
+
+const CART_STORAGE_KEY = "princeFarmCart";
+const ORDER_REF_STORAGE_KEY = "princeFarmOrderRef";
+
+const FORM_ENDPOINT_GENERAL = "https://formspree.io/f/mgonpadj";
+const FORM_ENDPOINT_JOBS = "https://formspree.io/f/mjgapylr";
 
 const products = [
   {
@@ -96,16 +102,123 @@ const services = [
   },
 ];
 
+const jobOpenings = [
+  {
+    title: "Poultry Attendant",
+    openings: null,
+    location: "Gbongan, Osun State",
+    schedule: "Full-time",
+    responsibilities: [
+      "Feeding and watering birds",
+      "Cleaning pens and equipment",
+      "Basic record keeping and reporting",
+    ],
+  },
+  {
+    title: "Bookkeeper",
+    openings: null,
+    location: "Gbongan, Osun State",
+    schedule: "Full-time",
+    responsibilities: [
+      "Daily sales and expense records",
+      "Stock and production records support",
+      "Weekly/monthly reporting",
+    ],
+  },
+  {
+    title: "Farm Worker / Laborer",
+    openings: null,
+    location: "Gbongan, Osun State",
+    schedule: "Full-time",
+    responsibilities: [
+      "General farm support and handling tasks",
+      "Loading/offloading and facility upkeep",
+      "Assisting with harvest/produce handling when needed",
+    ],
+  },
+  {
+    title: "Cleaner",
+    openings: null,
+    location: "Gbongan, Osun State",
+    schedule: "Full-time",
+    responsibilities: [
+      "Maintain clean office/store areas",
+      "Sanitation support around work spaces",
+      "General housekeeping duties",
+    ],
+  },
+];
+
 const contactInfo = {
-  phones: ["+234 806 022 2377", "+234 788 697 0951", "+571 275 8420"],
-  email: "christopheradebiyi@example.com",
+  phones: ["+234 806 022 2377", "+234 788 697 0951"],
+  whatsapp: "+1 (571) 275-8420",
+  email: "Christopheradebiyi@yahoo.com",
   address:
     "Iwaro Village, New Gbongan / Ife Express Road, Gbongan, Osun State, Nigeria.",
 };
 
 function App() {
-  const [cart, setCart] = useState({});
+  const [cart, setCart] = useState(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const storedCart = window.localStorage.getItem(CART_STORAGE_KEY);
+      if (!storedCart) return {};
+      const parsed = JSON.parse(storedCart);
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  });
   const [cartOpen, setCartOpen] = useState(false);
+  const [applyOpen, setApplyOpen] = useState(false);
+  const [applyRole, setApplyRole] = useState("");
+  const [orderRef, setOrderRef] = useState(() => {
+    if (typeof window === "undefined") {
+      return `PF-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+    }
+    try {
+      const storedRef = window.localStorage.getItem(ORDER_REF_STORAGE_KEY);
+      if (storedRef) return storedRef;
+    } catch {
+      // ignore read error, fall through to new ref
+    }
+    return `PF-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+  });
+
+  const jobRoles = useMemo(() => jobOpenings.map((job) => job.title), []);
+  const [statusOpen, setStatusOpen] = useState(false);
+  const [statusTitle, setStatusTitle] = useState("Sent");
+  const [statusMessage, setStatusMessage] = useState("");
+
+  useEffect(() => {
+    try {
+      if (typeof window === "undefined") return;
+      window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+      if (orderRef) {
+        window.localStorage.setItem(ORDER_REF_STORAGE_KEY, orderRef);
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, [cart, orderRef]);
+
+  useEffect(() => {
+    if (!applyOpen) return;
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setApplyOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [applyOpen]);
+
+  useEffect(() => {
+    if (!statusOpen) return;
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setStatusOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [statusOpen]);
 
   const totalItemsInCart = Object.values(cart).reduce(
     (sum, qty) => sum + qty,
@@ -130,6 +243,32 @@ function App() {
     });
   };
 
+  const submitToFormspree = async ({ endpoint, form, extraFields = {} }) => {
+    const fd = new FormData(form);
+    Object.entries(extraFields).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) fd.set(key, String(value));
+    });
+
+    const res = await fetch(endpoint, {
+      method: "POST",
+      body: fd,
+      headers: { Accept: "application/json" },
+    });
+
+    if (!res.ok) {
+      let message = "Please try again in a moment.";
+      try {
+        const data = await res.json();
+        if (data?.errors?.length) {
+          message = data.errors.map((e) => e.message).join(" ");
+        }
+      } catch {
+        // ignore parse errors
+      }
+      throw new Error(message);
+    }
+  };
+
   return (
     <div className="page">
       <header className="nav">
@@ -148,6 +287,7 @@ function App() {
           <a href="#products">Products</a>
           <a href="#services">Services</a>
           <a href="#training">Training</a>
+          <a href="#jobs">Jobs</a>
           <a href="#about">About</a>
           <a href="#contact" className="nav-cta">
             Contact
@@ -236,6 +376,40 @@ function App() {
                   </li>
                 ))}
               </ul>
+              <div className="cart-payment">
+                <p className="cart-payment-title">Bank transfer details</p>
+                <p className="cart-payment-text">
+                  <strong>Account name:</strong> Christopher Adebiyi
+                  <br />
+                  <strong>Bank:</strong> Zenith Bank
+                  <br />
+                  <strong>Account number:</strong> 2179352465
+                </p>
+                <p className="cart-payment-ref">
+                  <span className="label">Order reference</span>
+                  <span className="value">{orderRef}</span>
+                </p>
+                <p className="cart-payment-note">
+                  Please put this reference in your transfer description and
+                  send proof of payment with your name and this reference to our
+                  WhatsApp numbers on the Contact section so we can verify
+                  payment.
+                </p>
+                <button
+                  type="button"
+                  className="btn btn-outline btn-small cart-clear"
+                  onClick={() => {
+                    setCart({});
+                    const freshRef = `PF-${Math.random()
+                      .toString(36)
+                      .slice(2, 8)
+                      .toUpperCase()}`;
+                    setOrderRef(freshRef);
+                  }}
+                >
+                  Clear cart after payment
+                </button>
+              </div>
             </div>
           </>
         )}
@@ -293,7 +467,7 @@ function App() {
               retailers, hotels, caterers and bulk buyers.
             </p>
           </div>
-          <div className="grid">
+          <div className="grid products-grid">
             {products.map((product) => (
               <article key={product.name} className="card">
                 {(product.images && product.images.length > 0) || product.image ? (
@@ -397,6 +571,52 @@ function App() {
           </div>
         </section>
 
+        <section id="jobs" className="section section-alt">
+          <div className="section-header">
+            <h2>Employment Opportunities</h2>
+            <p>
+              We occasionally recruit dependable people to join our team. To
+              apply, click “Apply” and fill the form.
+            </p>
+          </div>
+          <div className="grid">
+            {jobOpenings.map((job) => (
+              <article key={job.title} className="card job-card">
+                <header className="job-card-header">
+                  <h3>{job.title}</h3>
+                  <span className="job-pill">
+                    {typeof job.openings === "number"
+                      ? `${job.openings} opening${job.openings === 1 ? "" : "s"}`
+                      : "Open role"}
+                  </span>
+                </header>
+                <div className="job-meta">
+                  <span>{job.location}</span>
+                  <span>•</span>
+                  <span>{job.schedule}</span>
+                </div>
+                <ul className="job-list">
+                  {job.responsibilities.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+                <div className="card-actions">
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-small"
+                    onClick={() => {
+                      setApplyRole(job.title);
+                      setApplyOpen(true);
+                    }}
+                  >
+                    Apply
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
         <section id="about" className="section">
           <div className="section-header">
             <h2>About Prince Adebamgbe&apos;s Farm</h2>
@@ -443,6 +663,10 @@ function App() {
                   {contactInfo.phones.map((phone) => (
                     <li key={phone}>{phone}</li>
                   ))}
+                  <li>
+                    <span className="whatsapp-icon">🟢</span>{" "}
+                    {contactInfo.whatsapp} (WhatsApp)
+                  </li>
                 </ul>
               </div>
               <div className="contact-block">
@@ -457,11 +681,31 @@ function App() {
 
             <form
               className="contact-form"
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
-                alert(
-                  "Thank you! Please configure form handling (e.g. email or API)."
-                );
+                const form = e.currentTarget;
+                try {
+                  await submitToFormspree({
+                    endpoint: FORM_ENDPOINT_GENERAL,
+                    form,
+                    extraFields: {
+                      _subject: "Prince Farm - Contact message",
+                      orderRef,
+                    },
+                  });
+                  form.reset();
+                  setStatusTitle("Message sent");
+                  setStatusMessage(
+                    "Thanks for reaching out. We’ve received your message and will respond shortly."
+                  );
+                  setStatusOpen(true);
+                } catch (err) {
+                  setStatusTitle("Not sent");
+                  setStatusMessage(
+                    `We could not send your message. ${err?.message || ""}`.trim()
+                  );
+                  setStatusOpen(true);
+                }
               }}
             >
               <h3>Send a Message</h3>
@@ -514,6 +758,156 @@ function App() {
           </div>
         </section>
       </main>
+
+      {applyOpen && (
+        <>
+          <button
+            type="button"
+            className="modal-backdrop"
+            onClick={() => setApplyOpen(false)}
+            aria-label="Close application form"
+          />
+          <div
+            className="modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Job application form"
+          >
+            <div className="modal-header">
+              <h3>Apply for a Job</h3>
+              <button
+                type="button"
+                className="modal-close"
+                onClick={() => setApplyOpen(false)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <form
+              className="modal-form"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const form = e.currentTarget;
+                try {
+                  await submitToFormspree({
+                    endpoint: FORM_ENDPOINT_JOBS,
+                    form,
+                    extraFields: {
+                      _subject: "Prince Farm - Job application",
+                      orderRef,
+                    },
+                  });
+                  form.reset();
+                  setApplyOpen(false);
+                  setStatusTitle("Application sent");
+                  setStatusMessage(
+                    "Your application has been received. We’ll contact you if you’re shortlisted."
+                  );
+                  setStatusOpen(true);
+                } catch (err) {
+                  setStatusTitle("Not sent");
+                  setStatusMessage(
+                    `We could not submit your application. ${err?.message || ""}`.trim()
+                  );
+                  setStatusOpen(true);
+                }
+              }}
+            >
+              <div className="form-row">
+                <label>
+                  Full Name
+                  <input type="text" name="name" required />
+                </label>
+              </div>
+              <div className="form-row">
+                <label>
+                  Phone Number
+                  <input type="tel" name="phone" required />
+                </label>
+              </div>
+              <div className="form-row">
+                <label>
+                  Email
+                  <input type="email" name="email" required />
+                </label>
+              </div>
+              <div className="form-row">
+                <label>
+                  Role
+                  <select
+                    name="jobRole"
+                    value={applyRole}
+                    onChange={(e) => setApplyRole(e.target.value)}
+                    required
+                  >
+                    <option value="" disabled>
+                      Select a role
+                    </option>
+                    {jobRoles.map((role) => (
+                      <option key={role} value={role}>
+                        {role}
+                      </option>
+                    ))}
+                    <option value="Other">Other</option>
+                  </select>
+                </label>
+              </div>
+              <div className="form-row">
+                <label>
+                  Message
+                  <textarea
+                    name="message"
+                    rows="4"
+                    placeholder="Tell us about your experience and availability."
+                    required
+                  />
+                </label>
+              </div>
+              <button type="submit" className="btn btn-primary btn-full">
+                Submit Application
+              </button>
+              <p className="form-note">
+                All listed roles are currently <strong>Full-time</strong>.
+              </p>
+            </form>
+          </div>
+        </>
+      )}
+
+      {statusOpen && (
+        <>
+          <button
+            type="button"
+            className="modal-backdrop"
+            onClick={() => setStatusOpen(false)}
+            aria-label="Close message"
+          />
+          <div className="modal modal-status" role="dialog" aria-modal="true">
+            <div className="modal-header">
+              <h3>{statusTitle}</h3>
+              <button
+                type="button"
+                className="modal-close"
+                onClick={() => setStatusOpen(false)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <p className="status-text">{statusMessage}</p>
+            <div className="status-actions">
+              <button
+                type="button"
+                className="btn btn-primary btn-full"
+                onClick={() => setStatusOpen(false)}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
       <footer className="footer">
         <p>

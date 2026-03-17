@@ -497,6 +497,61 @@ a {
   overflow-y: auto;
 }
 
+.cart-payment {
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgba(148, 163, 184, 0.7);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.cart-payment-title {
+  margin: 0 0 0.15rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.cart-payment-text {
+  margin: 0 0 0.25rem;
+}
+
+.cart-payment-ref {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0.1rem 0 0.25rem;
+}
+
+.cart-payment-ref .label {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.cart-payment-ref .value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 0.8rem;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.cart-payment-note {
+  margin: 0.1rem 0 0;
+  font-size: 0.75rem;
+}
+
+.cart-clear {
+  margin-top: 0.45rem;
+  width: 100%;
+  font-size: 0.78rem;
+  justify-content: center;
+}
+
 .cart-item {
   display: flex;
   flex-direction: column;
@@ -546,6 +601,73 @@ a {
   margin: 0;
   cursor: default;
   z-index: 25;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.55);
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  z-index: 35;
+}
+
+.modal {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(560px, calc(100vw - 2rem));
+  background: #0f172a;
+  color: #e5e7eb;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.45);
+  z-index: 40;
+  padding: 1.1rem 1.2rem 1.25rem;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.modal-header h3 {
+  margin: 0;
+}
+
+.modal-close {
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: rgba(255, 255, 255, 0.06);
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  color: #e5e7eb;
+  cursor: pointer;
+  padding: 0;
+}
+
+.modal-form {
+  margin-top: 0.6rem;
+}
+
+.modal-status .status-text {
+  margin: 0.6rem 0 0;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+.modal-status .status-actions {
+  margin-top: 0.9rem;
 }
 
 .service-header {
@@ -628,6 +750,16 @@ a {
   margin-bottom: 0.1rem;
 }
 
+.whatsapp-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+}
+
 .contact-form {
   background: #0f172a;
   color: #e5e7eb;
@@ -638,6 +770,42 @@ a {
 
 .contact-form h3 {
   margin-top: 0;
+}
+
+.job-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+
+.job-pill {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #e5e7eb;
+  white-space: nowrap;
+}
+
+.job-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.job-list {
+  margin: 0.2rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.job-list li {
+  margin-bottom: 0.35rem;
 }
 
 .form-row {
@@ -734,6 +902,8 @@ textarea {
   .hero-panel {
     order: 0; /* keep hero text first on mobile */
     max-width: 100%;
+    width: 100%;
+    margin-left: 0;
   }
 
   .about-layout,
@@ -773,5 +943,11 @@ textarea {
 
   .prices > div {
     flex: 1 1 130px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .products-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
