@@ -377,6 +377,16 @@ a {
   color: var(--muted);
 }
 
+.card-pricing-note {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.7rem 0.8rem;
+  border-radius: var(--radius-md);
+  background: var(--accent-soft);
+  color: #166534;
+}
+
 .prices {
   display: flex;
   justify-content: space-between;
@@ -946,8 +956,8 @@ textarea {
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 901px) {
   .products-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

@@ -61,6 +61,15 @@ const products = [
     wholesalePrice: "Custom quotes for large orders",
     unitPrice: null,
   },
+  {
+    name: "Fishery",
+    image: "/images/Nigeria-fishery01.jpg",
+    highlight: "Fresh fish from our fishery.",
+    details: "Available for households, retailers and bulk buyers.",
+    tags: ["Fresh fish"],
+    pricingMessage: "Sold by weight — price set on the scale when you buy.",
+    unitPrice: null,
+  },
 ];
 
 const services = [
@@ -366,6 +375,13 @@ function App() {
                             </>
                           );
                         }
+                        if (product?.pricingMessage) {
+                          return (
+                            <span className="cart-item-unit">
+                              Priced on the scale
+                            </span>
+                          );
+                        }
                         return (
                           <span className="cart-item-unit">
                             Contact for price
@@ -506,16 +522,20 @@ function App() {
                 </header>
                 <p className="card-highlight">{product.highlight}</p>
                 <p className="card-details">{product.details}</p>
-                <div className="prices">
-                  <div>
-                    <span className="label">Retail</span>
-                    <strong>{product.retailPrice}</strong>
+                {product.pricingMessage ? (
+                  <p className="card-pricing-note">{product.pricingMessage}</p>
+                ) : (
+                  <div className="prices">
+                    <div>
+                      <span className="label">Retail</span>
+                      <strong>{product.retailPrice}</strong>
+                    </div>
+                    <div>
+                      <span className="label">Wholesale</span>
+                      <strong>{product.wholesalePrice}</strong>
+                    </div>
                   </div>
-                  <div>
-                    <span className="label">Wholesale</span>
-                    <strong>{product.wholesalePrice}</strong>
-                  </div>
-                </div>
+                )}
                 <div className="card-actions">
                   <button
                     type="button"
