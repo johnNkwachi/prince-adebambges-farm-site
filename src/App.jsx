@@ -161,7 +161,7 @@ const jobOpenings = [
 const contactInfo = {
   phones: ["+234 806 022 2377", "+234 788 697 0951"],
   whatsapp: "+1 (571) 275-8420",
-  email: "Christopheradebiyi@yahoo.com",
+  email: "princeadebamgbefarm@yahoo.com",
   address:
     "Iwaro Village, New Gbongan / Ife Express Road, Gbongan, Osun State, Nigeria.",
 };
@@ -296,7 +296,7 @@ function App() {
           <a href="#products">Products</a>
           <a href="#services">Services</a>
           <a href="#training">Training</a>
-          <a href="#jobs">Jobs</a>
+          <a href="#careers">Careers</a>
           <a href="#about">About</a>
           <a href="#contact" className="nav-cta">
             Contact
@@ -591,9 +591,9 @@ function App() {
           </div>
         </section>
 
-        <section id="jobs" className="section section-alt">
+        <section id="careers" className="section section-alt">
           <div className="section-header">
-            <h2>Employment Opportunities</h2>
+            <h2>Careers</h2>
             <p>
               We occasionally recruit dependable people to join our team. To
               apply, click “Apply” and fill the form.
@@ -791,10 +791,10 @@ function App() {
             className="modal"
             role="dialog"
             aria-modal="true"
-            aria-label="Job application form"
+            aria-label="Career application form"
           >
             <div className="modal-header">
-              <h3>Apply for a Job</h3>
+              <h3>Apply for a role</h3>
               <button
                 type="button"
                 className="modal-close"
@@ -814,7 +814,7 @@ function App() {
                     endpoint: FORM_ENDPOINT_JOBS,
                     form,
                     extraFields: {
-                      _subject: "Prince Farm - Job application",
+                      _subject: "Prince Farm - Career application",
                       orderRef,
                     },
                   });
